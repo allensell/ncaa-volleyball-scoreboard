@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NCAA Volleyball Scoreboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0a0a1a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 16px 0 8px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      letter-spacing: 2px;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+
+    #clock {
+      font-size: 0.95rem;
+      color: #aaa;
+      margin-top: 6px;
+    }
+
+    #refresh-bar {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .sections {
+      display: flex;
+      gap: 24px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .section {
+      flex: 1;
+      min-width: 320px;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      border-radius: 8px 8px 0 0;
+      margin-bottom: 2px;
+    }
+
+    .mens .section-title  { background: #1a3a6b; color: #7eb3ff; border-left: 4px solid #3a7bd5; }
+    .womens .section-title { background: #4a1a3a; color: #ff9de0; border-left: 4px solid #c43aab; }
+
+    .game-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 4px 0;
+    }
+
+    .game-card {
+      background: #14142a;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 12px 16px;
+      transition: background 0.2s;
+    }
+
+    .game-card:hover { background: #1c1c38; }
+
+    .game-status {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .status-live    { color: #ff4d4d; }
+    .status-final   { color: #888; }
+    .status-pre     { color: #f0c040; }
+
+    .matchup {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .team-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .team-rank {
+      font-size: 0.7rem;
+      color: #888;
+      width: 22px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .team-logo {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      flex-shrink: 0;
+      border-radius: 4px;
+      background: #222;
+    }
+
+    .team-logo-placeholder {
+      width: 28px;
+      height: 28px;
+      background: #2a2a4a;
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: #555;
+    }
+
+    .team-name {
+      flex: 1;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #e8e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .team-name.winner { color: #ffffff; }
+
+    .score {
+      font-size: 1.2rem;
+      font-weight: 800;
+      min-width: 32px;
+      text-align: right;
+      color: #c0c0d8;
+    }
+
+    .score.winner { color: #ffffff; }
+    .score.no-score { color: #555; font-size: 0.85rem; }
+
+    .game-detail {
+      font-size: 0.72rem;
+      color: #666;
+      margin-top: 8px;
+    }
+
+    .broadcast-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .broadcast-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: #1e1e3a;
+      border: 1px solid #3a3a6a;
+      color: #a0b4ff;
+      white-space: nowrap;
+    }
+
+    .broadcast-badge.tv     { background: #1a2a1a; border-color: #3a6a3a; color: #80d080; }
+    .broadcast-badge.stream { background: #1a1a2e; border-color: #4a3a6a; color: #c080ff; }
+
+    .no-games {
+      background: #14142a;
+      border: 1px dashed #2a2a4a;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    .spinner {
+      text-align: center;
+      padding: 40px;
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    .error-msg {
+      background: #2a1010;
+      border: 1px solid #5a2020;
+      border-radius: 8px;
+      padding: 16px;
+      color: #ff8080;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    @media (max-width: 700px) {
+      .sections { flex-direction: column; }
+      header h1 { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>NCAA Volleyball Scoreboard</h1>
+  <div id="clock"></div>
+  <div id="refresh-bar">Refreshing every 60 seconds</div>
+</header>
+
+<div class="sections">
+  <div class="section mens">
+    <div class="section-title">&#9651; Men's Division I</div>
+    <div class="game-list" id="mens-games"><div class="spinner">Loading…</div></div>
+  </div>
+  <div class="section womens">
+    <div class="section-title">&#9651; Women's Division I</div>
+    <div class="game-list" id="womens-games"><div class="spinner">Loading…</div></div>
+  </div>
+</div>
+
+<script>
+  // ESPN public scoreboard endpoints
+  const MENS_URL   = 'https://site.api.espn.com/apis/site/v2/sports/volleyball/mens-college-volleyball/scoreboard';
+  const WOMENS_URL = 'https://site.api.espn.com/apis/site/v2/sports/volleyball/womens-college-volleyball/scoreboard';
+
+  function nowEastern() {
+    return new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
+  }
+
+  function updateClock() {
+    const now = new Date();
+    const et = now.toLocaleTimeString('en-US', {
+      timeZone: 'America/New_York',
+      hour: 'numeric', minute: '2-digit', second: '2-digit',
+      hour12: true
+    });
+    const date = now.toLocaleDateString('en-US', {
+      timeZone: 'America/New_York',
+      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+    });
+    document.getElementById('clock').textContent = `${date}  ·  ${et} ET`;
+  }
+
+  function formatGameTime(isoString) {
+    if (!isoString) return '';
+    const d = new Date(isoString);
+    return d.toLocaleTimeString('en-US', {
+      timeZone: 'America/New_York',
+      hour: 'numeric', minute: '2-digit', hour12: true
+    }) + ' ET';
+  }
+
+  function statusLabel(event) {
+    const state = event?.status?.type?.state || '';
+    const desc  = event?.status?.type?.shortDetail || event?.status?.type?.description || '';
+
+    if (state === 'in')    return { label: '● LIVE  ' + desc,         cls: 'status-live' };
+    if (state === 'post')  return { label: 'FINAL',                   cls: 'status-final' };
+    return { label: formatGameTime(event?.date),                       cls: 'status-pre' };
+  }
+
+  function teamLogo(team) {
+    const src = team?.team?.logo;
+    if (src) {
+      return `<img class="team-logo" src="${src}" alt="${team?.team?.abbreviation || ''}" onerror="this.style.display='none'">`;
+    }
+    return `<div class="team-logo-placeholder">${(team?.team?.abbreviation || '?').slice(0,3)}</div>`;
+  }
+
+  function buildCard(event) {
+    const comps = event?.competitions?.[0];
+    if (!comps) return '';
+
+    const competitors = comps?.competitors || [];
+    // ESPN typically: [0]=home, [1]=away — sort so "winner" marker is consistent
+    const home = competitors.find(c => c.homeAway === 'home') || competitors[0];
+    const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
+
+    const { label, cls } = statusLabel(event);
+    const isPost = event?.status?.type?.state === 'post';
+    const isLive = event?.status?.type?.state === 'in';
+
+    function teamRow(c) {
+      if (!c) return '';
+      const rank    = c.curatedRank?.current && c.curatedRank.current <= 25
+                      ? `#${c.curatedRank.current}` : '';
+      const hasScore= isPost || isLive;
+      const score   = hasScore ? (c.score ?? '—') : '';
+      const win     = isPost && c.winner;
+
+      return `
+        <div class="team-row">
+          <span class="team-rank">${rank}</span>
+          ${teamLogo(c)}
+          <span class="team-name ${win ? 'winner' : ''}">${c.team?.displayName || 'TBD'}</span>
+          <span class="score ${win ? 'winner' : ''} ${!hasScore ? 'no-score' : ''}">${score}</span>
+        </div>`;
+    }
+
+    const venue = comps?.venue?.fullName
+      ? `${comps.venue.fullName}${comps.venue.address?.city ? ', ' + comps.venue.address.city : ''}`
+      : '';
+    const note = comps?.notes?.[0]?.headline ? ` · ${comps.notes[0].headline}` : '';
+
+    // Collect broadcast networks from all available fields
+    const broadcastSet = new Set();
+    (comps?.broadcasts || []).forEach(b => (b.names || []).forEach(n => broadcastSet.add(n)));
+    (comps?.geoBroadcasts || []).forEach(b => {
+      const name = b.media?.shortName || b.media?.name;
+      if (name) broadcastSet.add(name);
+    });
+
+    const STREAMING_KEYWORDS = ['espn+', 'peacock', 'paramount+', 'max', 'hulu', 'fubo',
+                                'sling', 'youtube', 'amazon', 'apple', 'pluto', 'tubi', '+'];
+    const badges = [...broadcastSet].map(name => {
+      const lower = name.toLowerCase();
+      const cls = STREAMING_KEYWORDS.some(k => lower.includes(k)) ? 'stream' : 'tv';
+      return `<span class="broadcast-badge ${cls}">${name}</span>`;
+    }).join('');
+
+    const broadcastHtml = badges
+      ? `<div class="broadcast-row">${badges}</div>`
+      : '';
+
+    return `
+      <div class="game-card">
+        <div class="game-status ${cls}">${label}</div>
+        <div class="matchup">
+          ${teamRow(away)}
+          ${teamRow(home)}
+        </div>
+        ${broadcastHtml}
+        <div class="game-detail">${venue}${note}</div>
+      </div>`;
+  }
+
+  function todayStringET() {
+    // Returns "YYYY-MM-DD" for today in Eastern time
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  }
+
+  function gameDateStringET(isoString) {
+    if (!isoString) return '';
+    return new Date(isoString).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  }
+
+  async function fetchGames(url) {
+    const today = todayStringET();
+    const res = await fetch(`${url}?dates=${today.replace(/-/g, '')}&limit=50`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const events = data?.events || [];
+    // Extra safety: filter out any events not on today's date
+    return events.filter(e => gameDateStringET(e.date) === today);
+  }
+
+  function render(containerId, events) {
+    const el = document.getElementById(containerId);
+    if (!events.length) {
+      el.innerHTML = '<div class="no-games">No games scheduled for today.</div>';
+      return;
+    }
+    el.innerHTML = events.map(buildCard).join('');
+  }
+
+  async function loadAll() {
+    try {
+      const [mens, womens] = await Promise.all([
+        fetchGames(MENS_URL),
+        fetchGames(WOMENS_URL)
+      ]);
+      render('mens-games',   mens);
+      render('womens-games', womens);
+      const now = new Date().toLocaleTimeString('en-US', {
+        timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true
+      });
+      document.getElementById('refresh-bar').textContent = `Last updated ${now} ET · Auto-refreshing every 60 s`;
+    } catch (err) {
+      const msg = `<div class="error-msg">Could not load scores: ${err.message}<br>Check your connection and reload.</div>`;
+      document.getElementById('mens-games').innerHTML   = msg;
+      document.getElementById('womens-games').innerHTML = msg;
+    }
+  }
+
+  // Init
+  updateClock();
+  setInterval(updateClock, 1000);
+  loadAll();
+  setInterval(loadAll, 60000);
+</script>
+</body>
+</html>
