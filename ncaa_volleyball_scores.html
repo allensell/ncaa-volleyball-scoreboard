@@ -324,16 +324,22 @@
 <script>
   const BASE = 'https://site.api.espn.com/apis/site/v2/sports/volleyball';
 
-  // Each feed: id, ESPN league slug, whether to filter strictly to today,
-  // gender filter ('m'/'f'/null), fallback website if no ESPN coverage
+  // ESPN's volleyball API only carries mens-college-volleyball and
+  // womens-college-volleyball. Sand, AVP, and FIVB are not in their API.
+  // Feeds with noApi:true skip the network call and show a direct link card.
   const FEEDS = [
-    { id: 'mens-games',       slug: 'mens-college-volleyball',         todayOnly: true,  gender: null, fallback: null },
-    { id: 'womens-games',     slug: 'womens-college-volleyball',        todayOnly: true,  gender: null, fallback: null },
-    { id: 'sand-games',       slug: 'womens-college-sand-volleyball',   todayOnly: true,  gender: null, fallback: null },
-    { id: 'avp-mens-games',   slug: 'avp',                             todayOnly: false, gender: 'M',  fallback: 'https://www.avp.com' },
-    { id: 'avp-womens-games', slug: 'avp',                             todayOnly: false, gender: 'F',  fallback: 'https://www.avp.com' },
-    { id: 'fivb-mens-games',  slug: 'fivb-beach-volleyball-m',         todayOnly: false, gender: null, fallback: 'https://www.fivb.com/en/beachvolleyball' },
-    { id: 'fivb-womens-games',slug: 'fivb-beach-volleyball-w',         todayOnly: false, gender: null, fallback: 'https://www.fivb.com/en/beachvolleyball' },
+    { id: 'mens-games',        slug: 'mens-college-volleyball',  todayOnly: true,  gender: null, fallback: null },
+    { id: 'womens-games',      slug: 'womens-college-volleyball', todayOnly: true,  gender: null, fallback: null },
+    { id: 'sand-games',        noApi: true, fallback: 'https://www.ncaa.com/sports/volleyball-sand/d1',
+                               label: 'Live scores are not available via a public API for NCAA Sand Volleyball.' },
+    { id: 'avp-mens-games',    noApi: true, fallback: 'https://www.avp.com/schedule/',
+                               label: 'Live scores are not available via a public API for AVP.' },
+    { id: 'avp-womens-games',  noApi: true, fallback: 'https://www.avp.com/schedule/',
+                               label: 'Live scores are not available via a public API for AVP.' },
+    { id: 'fivb-mens-games',   noApi: true, fallback: 'https://www.fivb.com/en/beachvolleyball/schedule',
+                               label: 'Live scores are not available via a public API for FIVB.' },
+    { id: 'fivb-womens-games', noApi: true, fallback: 'https://www.fivb.com/en/beachvolleyball/schedule',
+                               label: 'Live scores are not available via a public API for FIVB.' },
   ];
 
   // ── Clock ──────────────────────────────────────────────────────────────
@@ -553,6 +559,16 @@
     }
   }
 
+  function renderNoApi(id, label, fallback) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = `
+      <div class="no-games">
+        ${label}<br>
+        <a href="${fallback}" target="_blank" rel="noopener">View schedule &amp; scores on official site ↗</a>
+      </div>`;
+  }
+
   function renderError(id, err, fallback) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -566,6 +582,10 @@
   async function loadAll() {
     await Promise.all(
       FEEDS.map(async feed => {
+        if (feed.noApi) {
+          renderNoApi(feed.id, feed.label, feed.fallback);
+          return;
+        }
         try {
           const events = await fetchFeed(feed);
           renderSection(feed.id, events, feed.todayOnly, feed.fallback);
