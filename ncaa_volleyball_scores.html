@@ -230,6 +230,19 @@
     }
     .error-msg a { color: #ff9090; }
 
+    /* ── Schedule date-group divider (AVP / FIVB) ── */
+    .date-divider {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #5a5a8a;
+      padding: 10px 4px 4px;
+      border-top: 1px solid #1e1e3a;
+      margin-top: 4px;
+    }
+    .date-divider:first-child { border-top: none; margin-top: 0; padding-top: 4px; }
+
     @media (max-width: 700px) {
       .sections { flex-direction: column; }
       header h1 { font-size: 1.4rem; }
@@ -451,24 +464,40 @@
   // ── Fetch + filter one feed ────────────────────────────────────────────
   async function fetchFeed({ slug, todayOnly, gender }) {
     const today = todayET();
-    const dateParam = todayOnly ? `&dates=${today.replace(/-/g, '')}` : '';
-    const url = `${BASE}/${slug}/scoreboard?limit=100${dateParam}`;
+    let dateParam;
+    if (todayOnly) {
+      // NCAA: strict single-day request
+      dateParam = `&dates=${today.replace(/-/g, '')}`;
+    } else {
+      // AVP / FIVB: full-season window — today through Dec 31 of current year
+      const year = new Date().getFullYear();
+      const start = today.replace(/-/g, '');
+      const end   = `${year}1231`;
+      dateParam = `&dates=${start}-${end}`;
+    }
+
+    const url = `${BASE}/${slug}/scoreboard?limit=200${dateParam}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     let events = data?.events || [];
 
-    // Strict today-only guard
+    // Strict today-only guard (belt-and-suspenders for NCAA feeds)
     if (todayOnly) {
       events = events.filter(e => dateET(e.date) === today);
     }
 
-    // Gender filter for combined feeds (e.g. AVP has both M & F)
+    // Gender filter for combined feeds (e.g. AVP may carry both M & F)
     if (gender) {
       events = events.filter(e => {
         const g = (e.competitions?.[0]?.gender || e.gender || '').toUpperCase();
-        return g === gender || g === '';   // keep if gender unknown
+        return g === gender || g === '';   // keep if gender tag is absent
       });
+    }
+
+    // Sort schedule feeds chronologically
+    if (!todayOnly) {
+      events.sort((a, b) => new Date(a.date) - new Date(b.date));
     }
 
     return events;
@@ -479,13 +508,34 @@
     const el = document.getElementById(id);
     if (!el) return;
     if (!events.length) {
+      const msg  = todayOnly ? 'No games scheduled for today.' : 'No schedule available.';
       const link = fallback
         ? `<br><a href="${fallback}" target="_blank" rel="noopener">Check official site ↗</a>`
         : '';
-      el.innerHTML = `<div class="no-games">No events today.${link}</div>`;
+      el.innerHTML = `<div class="no-games">${msg}${link}</div>`;
       return;
     }
-    el.innerHTML = events.map(e => buildCard(e, todayOnly)).join('');
+
+    if (todayOnly) {
+      // NCAA: plain list, no date headers needed
+      el.innerHTML = events.map(e => buildCard(e, todayOnly)).join('');
+    } else {
+      // AVP / FIVB: group matches by date with a visible divider
+      let html = '';
+      let lastDate = '';
+      for (const e of events) {
+        const d = dateET(e.date);
+        if (d !== lastDate) {
+          lastDate = d;
+          const label = new Date(e.date + 'T12:00:00Z').toLocaleDateString('en-US', {
+            weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+          });
+          html += `<div class="date-divider">📅 ${label}</div>`;
+        }
+        html += buildCard(e, todayOnly);
+      }
+      el.innerHTML = html;
+    }
   }
 
   function renderError(id, err, fallback) {
