@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NCAA Volleyball Scoreboard</title>
+  <title>Volleyball Scoreboard</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -12,58 +12,90 @@
       background: #0a0a1a;
       color: #e0e0e0;
       min-height: 100vh;
-      padding: 20px;
+      padding: 20px 24px 40px;
     }
 
-    header {
-      text-align: center;
-      padding: 16px 0 8px;
-    }
-
+    /* ── Header ── */
+    header { text-align: center; padding: 16px 0 8px; }
     header h1 {
       font-size: 2rem;
       letter-spacing: 2px;
       color: #ffffff;
       text-transform: uppercase;
     }
+    #clock       { font-size: 0.95rem; color: #aaa; margin-top: 6px; }
+    #refresh-bar { font-size: 0.8rem;  color: #666; margin-top: 4px; }
 
-    #clock {
-      font-size: 0.95rem;
-      color: #aaa;
-      margin-top: 6px;
+    /* ── Group dividers ── */
+    .group { margin-top: 32px; }
+
+    .group-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      padding: 6px 0 10px;
+      border-bottom: 1px solid #2a2a4a;
+      margin-bottom: 14px;
+    }
+    .group-header::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
     }
 
-    #refresh-bar {
-      font-size: 0.8rem;
-      color: #666;
-      margin-top: 4px;
-    }
+    .group-header.indoor { color: #7090cc; }
+    .group-header.indoor::before { background: #3a7bd5; }
 
+    .group-header.sand   { color: #d4a030; }
+    .group-header.sand::before   { background: #d4a030; }
+
+    .group-header.avp    { color: #30c4c4; }
+    .group-header.avp::before    { background: #20b4b4; }
+
+    .group-header.fivb   { color: #e06040; }
+    .group-header.fivb::before   { background: #cc4020; }
+
+    /* ── Section grid ── */
     .sections {
       display: flex;
-      gap: 24px;
-      margin-top: 24px;
+      gap: 16px;
       flex-wrap: wrap;
     }
+    .section { flex: 1; min-width: 300px; }
 
-    .section {
-      flex: 1;
-      min-width: 320px;
-    }
-
+    /* ── Section title bar ── */
     .section-title {
-      font-size: 1.1rem;
+      font-size: 0.85rem;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
-      padding: 10px 16px;
+      padding: 9px 14px;
       border-radius: 8px 8px 0 0;
       margin-bottom: 2px;
     }
 
-    .mens .section-title  { background: #1a3a6b; color: #7eb3ff; border-left: 4px solid #3a7bd5; }
-    .womens .section-title { background: #4a1a3a; color: #ff9de0; border-left: 4px solid #c43aab; }
+    /* Indoor */
+    .ncaa-mens  .section-title { background:#1a3a6b; color:#7eb3ff; border-left:4px solid #3a7bd5; }
+    .ncaa-womens .section-title { background:#4a1a3a; color:#ff9de0; border-left:4px solid #c43aab; }
 
+    /* Sand */
+    .ncaa-sand  .section-title { background:#2e1e00; color:#f0c060; border-left:4px solid #c88020; }
+
+    /* AVP */
+    .avp-mens   .section-title { background:#002e2e; color:#60e0e0; border-left:4px solid #20b0b0; }
+    .avp-womens .section-title { background:#2e1000; color:#f09060; border-left:4px solid #c05020; }
+
+    /* FIVB */
+    .fivb-mens  .section-title { background:#00204a; color:#60a0ff; border-left:4px solid #1060d0; }
+    .fivb-womens .section-title { background:#2a002a; color:#e080ff; border-left:4px solid #9030c0; }
+
+    /* ── Game list & cards ── */
     .game-list {
       display: flex;
       flex-direction: column;
@@ -75,29 +107,23 @@
       background: #14142a;
       border: 1px solid #2a2a4a;
       border-radius: 8px;
-      padding: 12px 16px;
+      padding: 12px 14px;
       transition: background 0.2s;
     }
-
     .game-card:hover { background: #1c1c38; }
 
     .game-status {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
       margin-bottom: 8px;
     }
+    .status-live  { color: #ff4d4d; }
+    .status-final { color: #888; }
+    .status-pre   { color: #f0c040; }
 
-    .status-live    { color: #ff4d4d; }
-    .status-final   { color: #888; }
-    .status-pre     { color: #f0c040; }
-
-    .matchup {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
+    .matchup { display: flex; flex-direction: column; gap: 6px; }
 
     .team-row {
       display: flex;
@@ -106,7 +132,7 @@
     }
 
     .team-rank {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: #888;
       width: 22px;
       text-align: right;
@@ -114,104 +140,95 @@
     }
 
     .team-logo {
-      width: 28px;
-      height: 28px;
+      width: 26px; height: 26px;
       object-fit: contain;
       flex-shrink: 0;
       border-radius: 4px;
       background: #222;
     }
-
     .team-logo-placeholder {
-      width: 28px;
-      height: 28px;
+      width: 26px; height: 26px;
       background: #2a2a4a;
       border-radius: 4px;
       flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.6rem;
-      color: #555;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; color: #555;
     }
 
     .team-name {
       flex: 1;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
-      color: #e8e8f0;
+      color: #d8d8f0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
     .team-name.winner { color: #ffffff; }
 
     .score {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 800;
-      min-width: 32px;
+      min-width: 30px;
       text-align: right;
       color: #c0c0d8;
     }
+    .score.winner   { color: #ffffff; }
+    .score.no-score { color: #444; font-size: 0.8rem; }
 
-    .score.winner { color: #ffffff; }
-    .score.no-score { color: #555; font-size: 0.85rem; }
-
-    .game-detail {
-      font-size: 0.72rem;
-      color: #666;
-      margin-top: 8px;
-    }
-
+    /* ── Broadcast badges ── */
     .broadcast-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
+      display: flex; flex-wrap: wrap; gap: 5px;
       margin-top: 8px;
     }
-
     .broadcast-badge {
-      font-size: 0.68rem;
-      font-weight: 700;
+      font-size: 0.65rem; font-weight: 700;
       letter-spacing: 0.5px;
       padding: 2px 7px;
       border-radius: 4px;
-      background: #1e1e3a;
-      border: 1px solid #3a3a6a;
-      color: #a0b4ff;
+      background: #1e1e3a; border: 1px solid #3a3a6a; color: #a0b4ff;
       white-space: nowrap;
     }
+    .broadcast-badge.tv     { background:#1a2a1a; border-color:#3a6a3a; color:#80d080; }
+    .broadcast-badge.stream { background:#1a1a2e; border-color:#4a3a6a; color:#c080ff; }
 
-    .broadcast-badge.tv     { background: #1a2a1a; border-color: #3a6a3a; color: #80d080; }
-    .broadcast-badge.stream { background: #1a1a2e; border-color: #4a3a6a; color: #c080ff; }
+    /* ── Location / note line ── */
+    .game-detail { font-size: 0.7rem; color: #555; margin-top: 6px; }
 
+    /* ── Tournament label (for AVP/FIVB) ── */
+    .tournament-label {
+      font-size: 0.68rem;
+      color: #888;
+      margin-bottom: 4px;
+      font-style: italic;
+    }
+
+    /* ── States ── */
     .no-games {
       background: #14142a;
       border: 1px dashed #2a2a4a;
       border-radius: 8px;
-      padding: 24px;
+      padding: 20px;
       text-align: center;
-      color: #555;
-      font-size: 0.9rem;
+      color: #444;
+      font-size: 0.85rem;
+      line-height: 1.5;
     }
+    .no-games a { color: #6080d0; }
 
-    .spinner {
-      text-align: center;
-      padding: 40px;
-      color: #555;
-      font-size: 0.9rem;
-    }
+    .spinner { text-align:center; padding:32px; color:#444; font-size:0.85rem; }
 
     .error-msg {
       background: #2a1010;
       border: 1px solid #5a2020;
       border-radius: 8px;
-      padding: 16px;
+      padding: 14px;
       color: #ff8080;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       text-align: center;
+      line-height: 1.5;
     }
+    .error-msg a { color: #ff9090; }
 
     @media (max-width: 700px) {
       .sections { flex-direction: column; }
@@ -222,128 +239,205 @@
 <body>
 
 <header>
-  <h1>NCAA Volleyball Scoreboard</h1>
+  <h1>Volleyball Scoreboard</h1>
   <div id="clock"></div>
   <div id="refresh-bar">Refreshing every 60 seconds</div>
 </header>
 
-<div class="sections">
-  <div class="section mens">
-    <div class="section-title">&#9651; Men's Division I</div>
-    <div class="game-list" id="mens-games"><div class="spinner">Loading…</div></div>
+<!-- ══════════════════════════════════════════
+     NCAA INDOOR
+═══════════════════════════════════════════ -->
+<div class="group">
+  <div class="group-header indoor">NCAA Division I Indoor</div>
+  <div class="sections">
+    <div class="section ncaa-mens">
+      <div class="section-title">&#9651; Men's</div>
+      <div class="game-list" id="mens-games"><div class="spinner">Loading…</div></div>
+    </div>
+    <div class="section ncaa-womens">
+      <div class="section-title">&#9651; Women's</div>
+      <div class="game-list" id="womens-games"><div class="spinner">Loading…</div></div>
+    </div>
   </div>
-  <div class="section womens">
-    <div class="section-title">&#9651; Women's Division I</div>
-    <div class="game-list" id="womens-games"><div class="spinner">Loading…</div></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     NCAA SAND
+═══════════════════════════════════════════ -->
+<div class="group">
+  <div class="group-header sand">NCAA Division I Women's Sand Volleyball</div>
+  <div class="sections">
+    <div class="section ncaa-sand">
+      <div class="section-title">&#9728; Women's Sand</div>
+      <div class="game-list" id="sand-games"><div class="spinner">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     AVP BEACH
+═══════════════════════════════════════════ -->
+<div class="group">
+  <div class="group-header avp">AVP Beach Volleyball</div>
+  <div class="sections">
+    <div class="section avp-mens">
+      <div class="section-title">&#127944; Men's</div>
+      <div class="game-list" id="avp-mens-games"><div class="spinner">Loading…</div></div>
+    </div>
+    <div class="section avp-womens">
+      <div class="section-title">&#127944; Women's</div>
+      <div class="game-list" id="avp-womens-games"><div class="spinner">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     FIVB BEACH
+═══════════════════════════════════════════ -->
+<div class="group">
+  <div class="group-header fivb">FIVB Beach Volleyball World Tour</div>
+  <div class="sections">
+    <div class="section fivb-mens">
+      <div class="section-title">&#127757; Men's</div>
+      <div class="game-list" id="fivb-mens-games"><div class="spinner">Loading…</div></div>
+    </div>
+    <div class="section fivb-womens">
+      <div class="section-title">&#127757; Women's</div>
+      <div class="game-list" id="fivb-womens-games"><div class="spinner">Loading…</div></div>
+    </div>
   </div>
 </div>
 
 <script>
-  // ESPN public scoreboard endpoints
-  const MENS_URL   = 'https://site.api.espn.com/apis/site/v2/sports/volleyball/mens-college-volleyball/scoreboard';
-  const WOMENS_URL = 'https://site.api.espn.com/apis/site/v2/sports/volleyball/womens-college-volleyball/scoreboard';
+  const BASE = 'https://site.api.espn.com/apis/site/v2/sports/volleyball';
 
-  function nowEastern() {
-    return new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
-  }
+  // Each feed: id, ESPN league slug, whether to filter strictly to today,
+  // gender filter ('m'/'f'/null), fallback website if no ESPN coverage
+  const FEEDS = [
+    { id: 'mens-games',       slug: 'mens-college-volleyball',         todayOnly: true,  gender: null, fallback: null },
+    { id: 'womens-games',     slug: 'womens-college-volleyball',        todayOnly: true,  gender: null, fallback: null },
+    { id: 'sand-games',       slug: 'womens-college-sand-volleyball',   todayOnly: true,  gender: null, fallback: null },
+    { id: 'avp-mens-games',   slug: 'avp',                             todayOnly: false, gender: 'M',  fallback: 'https://www.avp.com' },
+    { id: 'avp-womens-games', slug: 'avp',                             todayOnly: false, gender: 'F',  fallback: 'https://www.avp.com' },
+    { id: 'fivb-mens-games',  slug: 'fivb-beach-volleyball-m',         todayOnly: false, gender: null, fallback: 'https://www.fivb.com/en/beachvolleyball' },
+    { id: 'fivb-womens-games',slug: 'fivb-beach-volleyball-w',         todayOnly: false, gender: null, fallback: 'https://www.fivb.com/en/beachvolleyball' },
+  ];
 
+  // ── Clock ──────────────────────────────────────────────────────────────
   function updateClock() {
     const now = new Date();
     const et = now.toLocaleTimeString('en-US', {
-      timeZone: 'America/New_York',
-      hour: 'numeric', minute: '2-digit', second: '2-digit',
-      hour12: true
+      timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true
     });
     const date = now.toLocaleDateString('en-US', {
-      timeZone: 'America/New_York',
-      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+      timeZone: 'America/New_York', weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
     });
     document.getElementById('clock').textContent = `${date}  ·  ${et} ET`;
   }
 
-  function formatGameTime(isoString) {
-    if (!isoString) return '';
-    const d = new Date(isoString);
-    return d.toLocaleTimeString('en-US', {
+  // ── Date helpers ───────────────────────────────────────────────────────
+  function todayET() {
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // YYYY-MM-DD
+  }
+  function dateET(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  }
+  function formatTimeET(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleTimeString('en-US', {
+      timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true
+    }) + ' ET';
+  }
+  function formatDateTimeET(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleString('en-US', {
       timeZone: 'America/New_York',
+      month: 'short', day: 'numeric',
       hour: 'numeric', minute: '2-digit', hour12: true
     }) + ' ET';
   }
 
-  function statusLabel(event) {
+  // ── Status label ───────────────────────────────────────────────────────
+  function statusLabel(event, todayOnly) {
     const state = event?.status?.type?.state || '';
     const desc  = event?.status?.type?.shortDetail || event?.status?.type?.description || '';
-
-    if (state === 'in')    return { label: '● LIVE  ' + desc,         cls: 'status-live' };
-    if (state === 'post')  return { label: 'FINAL',                   cls: 'status-final' };
-    return { label: formatGameTime(event?.date),                       cls: 'status-pre' };
+    if (state === 'in')   return { label: '● LIVE  ' + desc, cls: 'status-live' };
+    if (state === 'post') return { label: 'FINAL',            cls: 'status-final' };
+    const fmt = todayOnly ? formatTimeET(event?.date) : formatDateTimeET(event?.date);
+    return { label: fmt || 'TBD', cls: 'status-pre' };
   }
 
-  function teamLogo(team) {
-    const src = team?.team?.logo;
+  // ── Team logo ──────────────────────────────────────────────────────────
+  function teamLogoHtml(c) {
+    const src = c?.team?.logo || c?.athlete?.headshot?.href;
+    const abbr = c?.team?.abbreviation || c?.athlete?.shortName || '?';
     if (src) {
-      return `<img class="team-logo" src="${src}" alt="${team?.team?.abbreviation || ''}" onerror="this.style.display='none'">`;
+      return `<img class="team-logo" src="${src}" alt="${abbr}" onerror="this.style.display='none'">`;
     }
-    return `<div class="team-logo-placeholder">${(team?.team?.abbreviation || '?').slice(0,3)}</div>`;
+    return `<div class="team-logo-placeholder">${abbr.slice(0,3)}</div>`;
   }
 
-  function buildCard(event) {
+  // ── Build a single game card ───────────────────────────────────────────
+  function buildCard(event, todayOnly) {
     const comps = event?.competitions?.[0];
     if (!comps) return '';
 
     const competitors = comps?.competitors || [];
-    // ESPN typically: [0]=home, [1]=away — sort so "winner" marker is consistent
     const home = competitors.find(c => c.homeAway === 'home') || competitors[0];
     const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
 
-    const { label, cls } = statusLabel(event);
+    const { label, cls } = statusLabel(event, todayOnly);
     const isPost = event?.status?.type?.state === 'post';
     const isLive = event?.status?.type?.state === 'in';
 
     function teamRow(c) {
       if (!c) return '';
-      const rank    = c.curatedRank?.current && c.curatedRank.current <= 25
-                      ? `#${c.curatedRank.current}` : '';
-      const hasScore= isPost || isLive;
-      const score   = hasScore ? (c.score ?? '—') : '';
-      const win     = isPost && c.winner;
-
+      const rank     = c.curatedRank?.current <= 25 ? `#${c.curatedRank.current}` : '';
+      const hasScore = isPost || isLive;
+      const score    = hasScore ? (c.score ?? '—') : '';
+      const win      = isPost && c.winner;
+      // Beach volleyball: prefer athlete display name
+      const name = c.team?.displayName || c.athlete?.displayName || 'TBD';
       return `
         <div class="team-row">
           <span class="team-rank">${rank}</span>
-          ${teamLogo(c)}
-          <span class="team-name ${win ? 'winner' : ''}">${c.team?.displayName || 'TBD'}</span>
+          ${teamLogoHtml(c)}
+          <span class="team-name ${win ? 'winner' : ''}">${name}</span>
           <span class="score ${win ? 'winner' : ''} ${!hasScore ? 'no-score' : ''}">${score}</span>
         </div>`;
     }
 
+    // Venue / note
     const venue = comps?.venue?.fullName
       ? `${comps.venue.fullName}${comps.venue.address?.city ? ', ' + comps.venue.address.city : ''}`
       : '';
     const note = comps?.notes?.[0]?.headline ? ` · ${comps.notes[0].headline}` : '';
 
-    // Collect broadcast networks from all available fields
+    // Tournament name (useful for AVP/FIVB)
+    const tournamentName = event?.season?.displayName || event?.league?.name || '';
+
+    // Broadcast badges
     const broadcastSet = new Set();
     (comps?.broadcasts || []).forEach(b => (b.names || []).forEach(n => broadcastSet.add(n)));
     (comps?.geoBroadcasts || []).forEach(b => {
-      const name = b.media?.shortName || b.media?.name;
-      if (name) broadcastSet.add(name);
+      const n = b.media?.shortName || b.media?.name;
+      if (n) broadcastSet.add(n);
     });
-
-    const STREAMING_KEYWORDS = ['espn+', 'peacock', 'paramount+', 'max', 'hulu', 'fubo',
-                                'sling', 'youtube', 'amazon', 'apple', 'pluto', 'tubi', '+'];
+    const STREAM_KW = ['espn+', 'peacock', 'paramount+', 'max', 'hulu', 'fubo',
+                       'sling', 'youtube', 'amazon', 'apple', 'pluto', 'tubi', '+'];
     const badges = [...broadcastSet].map(name => {
-      const lower = name.toLowerCase();
-      const cls = STREAMING_KEYWORDS.some(k => lower.includes(k)) ? 'stream' : 'tv';
-      return `<span class="broadcast-badge ${cls}">${name}</span>`;
+      const bCls = STREAM_KW.some(k => name.toLowerCase().includes(k)) ? 'stream' : 'tv';
+      return `<span class="broadcast-badge ${bCls}">${name}</span>`;
     }).join('');
+    const broadcastHtml = badges ? `<div class="broadcast-row">${badges}</div>` : '';
 
-    const broadcastHtml = badges
-      ? `<div class="broadcast-row">${badges}</div>`
-      : '';
+    const tournHtml = tournamentName
+      ? `<div class="tournament-label">${tournamentName}</div>` : '';
 
     return `
       <div class="game-card">
+        ${tournHtml}
         <div class="game-status ${cls}">${label}</div>
         <div class="matchup">
           ${teamRow(away)}
@@ -354,55 +448,76 @@
       </div>`;
   }
 
-  function todayStringET() {
-    // Returns "YYYY-MM-DD" for today in Eastern time
-    return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
-  }
-
-  function gameDateStringET(isoString) {
-    if (!isoString) return '';
-    return new Date(isoString).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
-  }
-
-  async function fetchGames(url) {
-    const today = todayStringET();
-    const res = await fetch(`${url}?dates=${today.replace(/-/g, '')}&limit=50`);
+  // ── Fetch + filter one feed ────────────────────────────────────────────
+  async function fetchFeed({ slug, todayOnly, gender }) {
+    const today = todayET();
+    const dateParam = todayOnly ? `&dates=${today.replace(/-/g, '')}` : '';
+    const url = `${BASE}/${slug}/scoreboard?limit=100${dateParam}`;
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    const events = data?.events || [];
-    // Extra safety: filter out any events not on today's date
-    return events.filter(e => gameDateStringET(e.date) === today);
+    let events = data?.events || [];
+
+    // Strict today-only guard
+    if (todayOnly) {
+      events = events.filter(e => dateET(e.date) === today);
+    }
+
+    // Gender filter for combined feeds (e.g. AVP has both M & F)
+    if (gender) {
+      events = events.filter(e => {
+        const g = (e.competitions?.[0]?.gender || e.gender || '').toUpperCase();
+        return g === gender || g === '';   // keep if gender unknown
+      });
+    }
+
+    return events;
   }
 
-  function render(containerId, events) {
-    const el = document.getElementById(containerId);
+  // ── Render one section ─────────────────────────────────────────────────
+  function renderSection(id, events, todayOnly, fallback) {
+    const el = document.getElementById(id);
+    if (!el) return;
     if (!events.length) {
-      el.innerHTML = '<div class="no-games">No games scheduled for today.</div>';
+      const link = fallback
+        ? `<br><a href="${fallback}" target="_blank" rel="noopener">Check official site ↗</a>`
+        : '';
+      el.innerHTML = `<div class="no-games">No events today.${link}</div>`;
       return;
     }
-    el.innerHTML = events.map(buildCard).join('');
+    el.innerHTML = events.map(e => buildCard(e, todayOnly)).join('');
   }
 
+  function renderError(id, err, fallback) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const link = fallback
+      ? ` <a href="${fallback}" target="_blank" rel="noopener">Official site ↗</a>`
+      : '';
+    el.innerHTML = `<div class="error-msg">Data unavailable (${err.message}).${link}</div>`;
+  }
+
+  // ── Load all feeds independently ───────────────────────────────────────
   async function loadAll() {
-    try {
-      const [mens, womens] = await Promise.all([
-        fetchGames(MENS_URL),
-        fetchGames(WOMENS_URL)
-      ]);
-      render('mens-games',   mens);
-      render('womens-games', womens);
-      const now = new Date().toLocaleTimeString('en-US', {
-        timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true
-      });
-      document.getElementById('refresh-bar').textContent = `Last updated ${now} ET · Auto-refreshing every 60 s`;
-    } catch (err) {
-      const msg = `<div class="error-msg">Could not load scores: ${err.message}<br>Check your connection and reload.</div>`;
-      document.getElementById('mens-games').innerHTML   = msg;
-      document.getElementById('womens-games').innerHTML = msg;
-    }
+    await Promise.all(
+      FEEDS.map(async feed => {
+        try {
+          const events = await fetchFeed(feed);
+          renderSection(feed.id, events, feed.todayOnly, feed.fallback);
+        } catch (err) {
+          renderError(feed.id, err, feed.fallback);
+        }
+      })
+    );
+
+    const now = new Date().toLocaleTimeString('en-US', {
+      timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true
+    });
+    document.getElementById('refresh-bar').textContent =
+      `Last updated ${now} ET · Auto-refreshing every 60 s`;
   }
 
-  // Init
+  // ── Init ───────────────────────────────────────────────────────────────
   updateClock();
   setInterval(updateClock, 1000);
   loadAll();
