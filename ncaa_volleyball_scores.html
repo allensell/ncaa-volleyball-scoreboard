@@ -462,42 +462,57 @@
   }
 
   // ── Fetch + filter one feed ────────────────────────────────────────────
+  // ESPN only accepts a single YYYYMMDD for ?dates=. For schedule feeds
+  // we fetch each upcoming week independently and merge the results.
+  async function fetchSingleDate(slug, yyyymmdd) {
+    const url = `${BASE}/${slug}/scoreboard?limit=100&dates=${yyyymmdd}`;
+    const res = await fetch(url);
+    if (!res.ok) return [];           // silently skip dates that have no data
+    const data = await res.json();
+    return data?.events || [];
+  }
+
   async function fetchFeed({ slug, todayOnly, gender }) {
     const today = todayET();
-    let dateParam;
+    let events = [];
+
     if (todayOnly) {
-      // NCAA: strict single-day request
-      dateParam = `&dates=${today.replace(/-/g, '')}`;
+      // NCAA: single-day fetch
+      const dateStr = today.replace(/-/g, '');
+      const url = `${BASE}/${slug}/scoreboard?limit=100&dates=${dateStr}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      events = (data?.events || []).filter(e => dateET(e.date) === today);
     } else {
-      // AVP / FIVB: full-season window — today through Dec 31 of current year
-      const year = new Date().getFullYear();
-      const start = today.replace(/-/g, '');
-      const end   = `${year}1231`;
-      dateParam = `&dates=${start}-${end}`;
-    }
-
-    const url = `${BASE}/${slug}/scoreboard?limit=200${dateParam}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    let events = data?.events || [];
-
-    // Strict today-only guard (belt-and-suspenders for NCAA feeds)
-    if (todayOnly) {
-      events = events.filter(e => dateET(e.date) === today);
+      // AVP / FIVB: walk week-by-week for ~20 weeks (rest of season)
+      // ESPN returns a full week of events when given any date in that week
+      const seen  = new Set();
+      const base  = new Date(today + 'T12:00:00');
+      const fetches = [];
+      for (let w = 0; w < 20; w++) {
+        const d = new Date(base);
+        d.setDate(d.getDate() + w * 7);
+        const yyyymmdd = d.toLocaleDateString('en-CA', { timeZone: 'America/New_York' }).replace(/-/g, '');
+        fetches.push(fetchSingleDate(slug, yyyymmdd));
+      }
+      const results = await Promise.all(fetches);
+      for (const batch of results) {
+        for (const e of batch) {
+          if (!seen.has(e.id)) { seen.add(e.id); events.push(e); }
+        }
+      }
+      // Drop events before today
+      events = events.filter(e => dateET(e.date) >= today);
+      events.sort((a, b) => new Date(a.date) - new Date(b.date));
     }
 
     // Gender filter for combined feeds (e.g. AVP may carry both M & F)
     if (gender) {
       events = events.filter(e => {
         const g = (e.competitions?.[0]?.gender || e.gender || '').toUpperCase();
-        return g === gender || g === '';   // keep if gender tag is absent
+        return g === gender || g === '';
       });
-    }
-
-    // Sort schedule feeds chronologically
-    if (!todayOnly) {
-      events.sort((a, b) => new Date(a.date) - new Date(b.date));
     }
 
     return events;
