@@ -25,7 +25,8 @@
       text-transform: uppercase;
     }
     #clock       { font-size: 0.95rem; color: #aaa; margin-top: 6px; }
-    #refresh-bar { font-size: 0.8rem;  color: #666; margin-top: 4px; }
+    #week-label  { font-size: 0.8rem;  color: #7090cc; margin-top: 4px; }
+    #refresh-bar { font-size: 0.75rem; color: #555; margin-top: 2px; }
 
     /* ── Group dividers ── */
     .group { margin-top: 32px; }
@@ -178,12 +179,27 @@
     /* ── Location / note line ── */
     .game-detail { font-size: 0.7rem; color: #555; margin-top: 6px; }
 
-    /* ── Tournament label (for AVP/FIVB) ── */
-    .tournament-label {
-      font-size: 0.68rem;
-      color: #888;
-      margin-bottom: 4px;
-      font-style: italic;
+    /* ── Week date-group dividers ── */
+    .date-divider {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #4a4a7a;
+      padding: 12px 2px 5px;
+      border-top: 1px solid #1e1e3a;
+      margin-top: 6px;
+    }
+    .date-divider:first-child { border-top: none; margin-top: 0; padding-top: 2px; }
+    .date-divider.today {
+      color: #f0c040;
+      border-top-color: #3a3a20;
+    }
+    .date-divider.today::after {
+      content: ' — TODAY';
+      font-size: 0.6rem;
+      color: #c09020;
+      letter-spacing: 1.5px;
     }
 
     /* ── States ── */
@@ -225,6 +241,7 @@
 <header>
   <h1>Volleyball Scoreboard</h1>
   <div id="clock"></div>
+  <div id="week-label"></div>
   <div id="refresh-bar">Refreshing every 60 seconds</div>
 </header>
 
@@ -250,8 +267,8 @@
   const BASE = 'https://site.api.espn.com/apis/site/v2/sports/volleyball';
 
   const FEEDS = [
-    { id: 'mens-games',   slug: 'mens-college-volleyball',  todayOnly: true },
-    { id: 'womens-games', slug: 'womens-college-volleyball', todayOnly: true },
+    { id: 'mens-games',   slug: 'mens-college-volleyball'  },
+    { id: 'womens-games', slug: 'womens-college-volleyball' },
   ];
 
   // ── Clock ──────────────────────────────────────────────────────────────
@@ -264,6 +281,13 @@
       timeZone: 'America/New_York', weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
     });
     document.getElementById('clock').textContent = `${date}  ·  ${et} ET`;
+
+    // Week label (Mon – Sun)
+    const days = weekDatesET();
+    const fmt = d => new Date(d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6)+'T12:00:00')
+      .toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    document.getElementById('week-label').textContent =
+      `Week of ${fmt(days[0])} – ${fmt(days[6])}`;
   }
 
   // ── Date helpers ───────────────────────────────────────────────────────
@@ -280,23 +304,30 @@
       timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true
     }) + ' ET';
   }
-  function formatDateTimeET(iso) {
-    if (!iso) return '';
-    return new Date(iso).toLocaleString('en-US', {
-      timeZone: 'America/New_York',
-      month: 'short', day: 'numeric',
-      hour: 'numeric', minute: '2-digit', hour12: true
-    }) + ' ET';
+
+  // Returns YYYYMMDD strings for Mon–Sun of the week containing today (ET)
+  function weekDatesET() {
+    const todayStr = todayET();
+    const base = new Date(todayStr + 'T12:00:00');
+    const dow = base.getDay(); // 0=Sun … 6=Sat
+    const monday = new Date(base);
+    monday.setDate(base.getDate() - (dow === 0 ? 6 : dow - 1));
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      dates.push(d.toLocaleDateString('en-CA').replace(/-/g, ''));
+    }
+    return dates;
   }
 
   // ── Status label ───────────────────────────────────────────────────────
-  function statusLabel(event, todayOnly) {
+  function statusLabel(event) {
     const state = event?.status?.type?.state || '';
     const desc  = event?.status?.type?.shortDetail || event?.status?.type?.description || '';
     if (state === 'in')   return { label: '● LIVE  ' + desc, cls: 'status-live' };
     if (state === 'post') return { label: 'FINAL',            cls: 'status-final' };
-    const fmt = todayOnly ? formatTimeET(event?.date) : formatDateTimeET(event?.date);
-    return { label: fmt || 'TBD', cls: 'status-pre' };
+    return { label: formatTimeET(event?.date) || 'TBD',       cls: 'status-pre' };
   }
 
   // ── Team logo ──────────────────────────────────────────────────────────
@@ -318,7 +349,7 @@
     const home = competitors.find(c => c.homeAway === 'home') || competitors[0];
     const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
 
-    const { label, cls } = statusLabel(event, todayOnly);
+    const { label, cls } = statusLabel(event);
     const isPost = event?.status?.type?.state === 'post';
     const isLive = event?.status?.type?.state === 'in';
 
@@ -345,9 +376,6 @@
       : '';
     const note = comps?.notes?.[0]?.headline ? ` · ${comps.notes[0].headline}` : '';
 
-    // Tournament name (useful for AVP/FIVB)
-    const tournamentName = event?.season?.displayName || event?.league?.name || '';
-
     // Broadcast badges
     const broadcastSet = new Set();
     (comps?.broadcasts || []).forEach(b => (b.names || []).forEach(n => broadcastSet.add(n)));
@@ -363,12 +391,8 @@
     }).join('');
     const broadcastHtml = badges ? `<div class="broadcast-row">${badges}</div>` : '';
 
-    const tournHtml = tournamentName
-      ? `<div class="tournament-label">${tournamentName}</div>` : '';
-
     return `
       <div class="game-card">
-        ${tournHtml}
         <div class="game-status ${cls}">${label}</div>
         <div class="matchup">
           ${teamRow(away)}
@@ -379,105 +403,60 @@
       </div>`;
   }
 
-  // ── Fetch + filter one feed ────────────────────────────────────────────
-  // ESPN only accepts a single YYYYMMDD for ?dates=. For schedule feeds
-  // we fetch each upcoming week independently and merge the results.
-  async function fetchSingleDate(slug, yyyymmdd) {
+  // ── Fetch one day from ESPN ────────────────────────────────────────────
+  async function fetchDay(slug, yyyymmdd) {
     const url = `${BASE}/${slug}/scoreboard?limit=100&dates=${yyyymmdd}`;
     const res = await fetch(url);
-    if (!res.ok) return [];           // silently skip dates that have no data
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     return data?.events || [];
   }
 
-  async function fetchFeed({ slug, todayOnly, gender }) {
-    const today = todayET();
-    let events = [];
-
-    if (todayOnly) {
-      // NCAA: single-day fetch
-      const dateStr = today.replace(/-/g, '');
-      const url = `${BASE}/${slug}/scoreboard?limit=100&dates=${dateStr}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      events = (data?.events || []).filter(e => dateET(e.date) === today);
-    } else {
-      // AVP / FIVB: walk week-by-week for ~20 weeks (rest of season)
-      // ESPN returns a full week of events when given any date in that week
-      const seen  = new Set();
-      const base  = new Date(today + 'T12:00:00');
-      const fetches = [];
-      for (let w = 0; w < 20; w++) {
-        const d = new Date(base);
-        d.setDate(d.getDate() + w * 7);
-        const yyyymmdd = d.toLocaleDateString('en-CA', { timeZone: 'America/New_York' }).replace(/-/g, '');
-        fetches.push(fetchSingleDate(slug, yyyymmdd));
+  // ── Fetch the full current week (Mon–Sun) for a feed ──────────────────
+  async function fetchFeed({ slug }) {
+    const days = weekDatesET();
+    const results = await Promise.all(days.map(d => fetchDay(slug, d)));
+    const seen = new Set();
+    const events = [];
+    for (const batch of results) {
+      for (const e of batch) {
+        if (!seen.has(e.id)) { seen.add(e.id); events.push(e); }
       }
-      const results = await Promise.all(fetches);
-      for (const batch of results) {
-        for (const e of batch) {
-          if (!seen.has(e.id)) { seen.add(e.id); events.push(e); }
-        }
-      }
-      // Drop events before today
-      events = events.filter(e => dateET(e.date) >= today);
-      events.sort((a, b) => new Date(a.date) - new Date(b.date));
     }
-
-    // Gender filter for combined feeds (e.g. AVP may carry both M & F)
-    if (gender) {
-      events = events.filter(e => {
-        const g = (e.competitions?.[0]?.gender || e.gender || '').toUpperCase();
-        return g === gender || g === '';
-      });
-    }
-
+    events.sort((a, b) => new Date(a.date) - new Date(b.date));
     return events;
   }
 
-  // ── Render one section ─────────────────────────────────────────────────
-  function renderSection(id, events, todayOnly, fallback) {
+  // ── Render one section grouped by date ────────────────────────────────
+  function renderSection(id, events) {
     const el = document.getElementById(id);
     if (!el) return;
     if (!events.length) {
-      const msg  = todayOnly ? 'No games scheduled for today.' : 'No schedule available.';
-      const link = fallback
-        ? `<br><a href="${fallback}" target="_blank" rel="noopener">Check official site ↗</a>`
-        : '';
-      el.innerHTML = `<div class="no-games">${msg}${link}</div>`;
+      el.innerHTML = '<div class="no-games">No games scheduled this week.</div>';
       return;
     }
-
-    if (todayOnly) {
-      // NCAA: plain list, no date headers needed
-      el.innerHTML = events.map(e => buildCard(e, todayOnly)).join('');
-    } else {
-      // AVP / FIVB: group matches by date with a visible divider
-      let html = '';
-      let lastDate = '';
-      for (const e of events) {
-        const d = dateET(e.date);
-        if (d !== lastDate) {
-          lastDate = d;
-          const label = new Date(e.date + 'T12:00:00Z').toLocaleDateString('en-US', {
-            weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
-          });
-          html += `<div class="date-divider">📅 ${label}</div>`;
-        }
-        html += buildCard(e, todayOnly);
+    const today = todayET();
+    let html = '';
+    let lastDate = '';
+    for (const e of events) {
+      const d = dateET(e.date);
+      if (d !== lastDate) {
+        lastDate = d;
+        const isToday = d === today;
+        const label = new Date(d + 'T12:00:00').toLocaleDateString('en-US', {
+          weekday: 'long', month: 'short', day: 'numeric'
+        });
+        html += `<div class="date-divider ${isToday ? 'today' : ''}">${label}</div>`;
       }
-      el.innerHTML = html;
+      html += buildCard(e);
     }
+    el.innerHTML = html;
   }
 
-  function renderError(id, err, fallback) {
+  function renderError(id, err) {
     const el = document.getElementById(id);
     if (!el) return;
-    const link = fallback
-      ? ` <a href="${fallback}" target="_blank" rel="noopener">Official site ↗</a>`
-      : '';
-    el.innerHTML = `<div class="error-msg">Data unavailable (${err.message}).${link}</div>`;
+    el.innerHTML = `<div class="error-msg">Data unavailable (${err.message}).</div>`;
   }
 
   // ── Load all feeds independently ───────────────────────────────────────
@@ -486,9 +465,9 @@
       FEEDS.map(async feed => {
         try {
           const events = await fetchFeed(feed);
-          renderSection(feed.id, events, feed.todayOnly, feed.fallback);
+          renderSection(feed.id, events);
         } catch (err) {
-          renderError(feed.id, err, feed.fallback);
+          renderError(feed.id, err);
         }
       })
     );
