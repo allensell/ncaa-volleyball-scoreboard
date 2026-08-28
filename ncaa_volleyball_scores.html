@@ -13,263 +13,269 @@
       background: #0a0a1a;
       color: #e0e0e0;
       min-height: 100vh;
-      padding: 20px 24px 40px;
+      display: flex;
+      flex-direction: column;
     }
 
     /* ── Header ── */
-    header { text-align: center; padding: 16px 0 8px; }
+    header {
+      text-align: center;
+      padding: 16px 24px 0;
+      flex-shrink: 0;
+    }
     header h1 {
-      font-size: 2rem;
+      font-size: 1.8rem;
       letter-spacing: 2px;
       color: #ffffff;
       text-transform: uppercase;
     }
-    #clock       { font-size: 0.95rem; color: #aaa; margin-top: 6px; }
-    #week-label  { font-size: 0.8rem;  color: #7090cc; margin-top: 4px; }
-    #refresh-bar { font-size: 0.75rem; color: #555; margin-top: 2px; }
+    #clock       { font-size: 0.9rem;  color: #aaa; margin-top: 4px; }
+    #week-label  { font-size: 0.75rem; color: #666; margin-top: 2px; }
+    #refresh-bar { font-size: 0.72rem; color: #555; margin-top: 2px; }
 
-    /* ── Group dividers ── */
-    .group { margin-top: 32px; }
-
-    .group-header {
+    /* ── Tab bar ── */
+    .tab-bar {
       display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 0.75rem;
-      font-weight: 800;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      padding: 6px 0 10px;
-      border-bottom: 1px solid #2a2a4a;
-      margin-bottom: 14px;
-    }
-    .group-header::before {
-      content: '';
-      display: inline-block;
-      width: 8px; height: 8px;
-      border-radius: 50%;
+      gap: 0;
+      padding: 14px 24px 0;
+      border-bottom: 2px solid #1e1e3a;
       flex-shrink: 0;
     }
-
-    .group-header.indoor { color: #7090cc; }
-    .group-header.indoor::before { background: #3a7bd5; }
-
-
-    /* ── Section grid ── */
-    .sections {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .section { flex: 1; min-width: 300px; }
-
-    /* ── Section title bar ── */
-    .section-title {
-      font-size: 0.85rem;
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      padding: 8px 28px;
+      font-size: 0.9rem;
       font-weight: 700;
-      letter-spacing: 1.2px;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      padding: 9px 14px;
-      border-radius: 8px 8px 0 0;
-      margin-bottom: 2px;
+      color: #555;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn:hover { color: #aaa; }
+    .tab-btn.active-mens   { color: #7eb3ff; border-bottom-color: #3a7bd5; }
+    .tab-btn.active-womens { color: #ff9de0; border-bottom-color: #c43aab; }
+
+    /* ── Tab panels ── */
+    .tab-panel { display: none; flex: 1; overflow: hidden; }
+    .tab-panel.active { display: flex; flex-direction: column; }
+
+    /* ── Men's panel: single scrollable column ── */
+    #panel-mens {
+      padding: 16px 24px 24px;
+      overflow-y: auto;
     }
 
-    /* Indoor */
-    .ncaa-mens  .section-title { background:#1a3a6b; color:#7eb3ff; border-left:4px solid #3a7bd5; }
-    .ncaa-womens .section-title { background:#4a1a3a; color:#ff9de0; border-left:4px solid #c43aab; }
+    /* ── Women's panel: two fixed-height columns ── */
+    #panel-womens {
+      flex-direction: row;
+      gap: 0;
+      overflow: hidden;
+    }
 
-
-    /* ── Game list & cards ── */
-    .game-list {
+    .womens-col {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      padding: 4px 0;
+      overflow: hidden;
+      border-right: 1px solid #1a1a2e;
     }
+    .womens-col:last-child { border-right: none; }
+
+    .col-header {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      flex-shrink: 0;
+      border-bottom: 1px solid #1e1e3a;
+    }
+    .col-header.upcoming { color: #f0c040; background: #0e0e1c; }
+    .col-header.completed { color: #888;    background: #0c0c18; }
+
+    .col-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 16px 24px;
+    }
+
+    /* ── Date dividers ── */
+    .date-divider {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #3a3a6a;
+      padding: 12px 2px 4px;
+      border-top: 1px solid #1a1a2a;
+      margin-top: 4px;
+    }
+    .date-divider:first-child { border-top: none; margin-top: 0; padding-top: 2px; }
+    .date-divider.today { color: #c09020; border-top-color: #2a2a10; }
+    .date-divider.today::after {
+      content: ' — TODAY';
+      font-size: 0.6rem;
+      color: #806010;
+      letter-spacing: 1.5px;
+    }
+
+    /* ── Game cards ── */
+    .game-list { display: flex; flex-direction: column; gap: 6px; }
 
     .game-card {
       background: #14142a;
       border: 1px solid #2a2a4a;
       border-radius: 8px;
-      padding: 12px 14px;
+      padding: 10px 12px;
       transition: background 0.2s;
     }
     .game-card:hover { background: #1c1c38; }
 
     .game-status {
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 7px;
     }
     .status-live  { color: #ff4d4d; }
-    .status-final { color: #888; }
+    .status-final { color: #666; }
     .status-pre   { color: #f0c040; }
 
-    .matchup { display: flex; flex-direction: column; gap: 6px; }
+    .matchup { display: flex; flex-direction: column; gap: 5px; }
 
-    .team-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .team-row { display: flex; align-items: center; gap: 7px; }
 
     .team-rank {
-      font-size: 0.68rem;
-      color: #888;
-      width: 22px;
+      font-size: 0.65rem;
+      color: #777;
+      width: 20px;
       text-align: right;
       flex-shrink: 0;
     }
-
     .team-logo {
-      width: 26px; height: 26px;
+      width: 24px; height: 24px;
       object-fit: contain;
       flex-shrink: 0;
-      border-radius: 4px;
-      background: #222;
+      border-radius: 3px;
+      background: #1e1e30;
     }
     .team-logo-placeholder {
-      width: 26px; height: 26px;
-      background: #2a2a4a;
-      border-radius: 4px;
+      width: 24px; height: 24px;
+      background: #222240;
+      border-radius: 3px;
       flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.55rem; color: #555;
+      font-size: 0.5rem; color: #555;
     }
-
     .team-name {
       flex: 1;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      color: #d8d8f0;
+      color: #c8c8e8;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .team-name.winner { color: #ffffff; }
-
     .score {
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 800;
-      min-width: 30px;
+      min-width: 28px;
       text-align: right;
-      color: #c0c0d8;
+      color: #b0b0cc;
     }
     .score.winner   { color: #ffffff; }
-    .score.no-score { color: #444; font-size: 0.8rem; }
+    .score.no-score { color: #333; font-size: 0.75rem; }
 
     /* ── Broadcast badges ── */
-    .broadcast-row {
-      display: flex; flex-wrap: wrap; gap: 5px;
-      margin-top: 8px;
-    }
+    .broadcast-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
     .broadcast-badge {
-      font-size: 0.65rem; font-weight: 700;
-      letter-spacing: 0.5px;
-      padding: 2px 7px;
-      border-radius: 4px;
-      background: #1e1e3a; border: 1px solid #3a3a6a; color: #a0b4ff;
+      font-size: 0.62rem; font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: #1e1e3a; border: 1px solid #3a3a6a; color: #90a8f0;
       white-space: nowrap;
     }
-    .broadcast-badge.tv     { background:#1a2a1a; border-color:#3a6a3a; color:#80d080; }
-    .broadcast-badge.stream { background:#1a1a2e; border-color:#4a3a6a; color:#c080ff; }
+    .broadcast-badge.tv     { background:#182818; border-color:#385038; color:#70c070; }
+    .broadcast-badge.stream { background:#181828; border-color:#403060; color:#b070f0; }
 
-    /* ── Location / note line ── */
-    .game-detail { font-size: 0.7rem; color: #555; margin-top: 6px; }
+    .game-detail { font-size: 0.67rem; color: #484860; margin-top: 5px; }
 
-    /* ── Week date-group dividers ── */
-    .date-divider {
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: #4a4a7a;
-      padding: 12px 2px 5px;
-      border-top: 1px solid #1e1e3a;
-      margin-top: 6px;
-    }
-    .date-divider:first-child { border-top: none; margin-top: 0; padding-top: 2px; }
-    .date-divider.today {
-      color: #f0c040;
-      border-top-color: #3a3a20;
-    }
-    .date-divider.today::after {
-      content: ' — TODAY';
-      font-size: 0.6rem;
-      color: #c09020;
-      letter-spacing: 1.5px;
-    }
-
-    /* ── States ── */
+    /* ── Empty / error states ── */
     .no-games {
-      background: #14142a;
-      border: 1px dashed #2a2a4a;
-      border-radius: 8px;
-      padding: 20px;
+      padding: 24px 8px;
       text-align: center;
-      color: #444;
+      color: #383860;
       font-size: 0.85rem;
-      line-height: 1.5;
     }
-    .no-games a { color: #6080d0; }
-
-    .spinner { text-align:center; padding:32px; color:#444; font-size:0.85rem; }
-
     .error-msg {
-      background: #2a1010;
-      border: 1px solid #5a2020;
-      border-radius: 8px;
-      padding: 14px;
-      color: #ff8080;
-      font-size: 0.8rem;
-      text-align: center;
-      line-height: 1.5;
+      background: #2a1010; border: 1px solid #5a2020;
+      border-radius: 8px; padding: 12px;
+      color: #ff8080; font-size: 0.8rem; text-align: center;
     }
-    .error-msg a { color: #ff9090; }
+    .spinner { padding: 32px; text-align: center; color: #383860; font-size: 0.85rem; }
 
-
+    /* ── Responsive ── */
     @media (max-width: 700px) {
-      .sections { flex-direction: column; }
-      header h1 { font-size: 1.4rem; }
+      #panel-womens { flex-direction: column; }
+      .womens-col { border-right: none; border-bottom: 1px solid #1a1a2e; }
+      .womens-col:last-child { border-bottom: none; }
+      header h1 { font-size: 1.3rem; }
+      .tab-btn { padding: 8px 16px; font-size: 0.8rem; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Volleyball Scoreboard</h1>
+  <h1>NCAA Volleyball Scoreboard</h1>
   <div id="clock"></div>
   <div id="week-label"></div>
-  <div id="refresh-bar">Refreshing every 60 seconds</div>
+  <div id="refresh-bar">Loading…</div>
 </header>
 
-<!-- ══════════════════════════════════════════
-     NCAA INDOOR
-═══════════════════════════════════════════ -->
-<div class="group">
-  <div class="group-header indoor">NCAA Division I Indoor</div>
-  <div class="sections">
-    <div class="section ncaa-mens">
-      <div class="section-title">&#9651; Men's</div>
-      <div class="game-list" id="mens-games"><div class="spinner">Loading…</div></div>
+<!-- ── Tab bar ── -->
+<div class="tab-bar">
+  <button class="tab-btn active-mens" id="tab-mens"   onclick="showTab('mens')">&#9651; Men's</button>
+  <button class="tab-btn"             id="tab-womens" onclick="showTab('womens')">&#9651; Women's</button>
+</div>
+
+<!-- ── Men's panel ── -->
+<div class="tab-panel active" id="panel-mens">
+  <div class="game-list" id="mens-games"><div class="spinner">Loading…</div></div>
+</div>
+
+<!-- ── Women's panel ── -->
+<div class="tab-panel" id="panel-womens">
+  <div class="womens-col">
+    <div class="col-header upcoming">&#9654; Live &amp; Upcoming</div>
+    <div class="col-scroll">
+      <div class="game-list" id="womens-upcoming"><div class="spinner">Loading…</div></div>
     </div>
-    <div class="section ncaa-womens">
-      <div class="section-title">&#9651; Women's</div>
-      <div class="game-list" id="womens-games"><div class="spinner">Loading…</div></div>
+  </div>
+  <div class="womens-col">
+    <div class="col-header completed">&#10003; Completed</div>
+    <div class="col-scroll">
+      <div class="game-list" id="womens-completed"><div class="spinner">Loading…</div></div>
     </div>
   </div>
 </div>
 
-
 <script>
   const BASE = 'https://site.api.espn.com/apis/site/v2/sports/volleyball';
 
-  const FEEDS = [
-    { id: 'mens-games',   slug: 'mens-college-volleyball'  },
-    { id: 'womens-games', slug: 'womens-college-volleyball' },
-  ];
+  // ── Tab switching ──────────────────────────────────────────────────────
+  function showTab(which) {
+    document.getElementById('panel-mens').classList.toggle('active', which === 'mens');
+    document.getElementById('panel-womens').classList.toggle('active', which === 'womens');
+    document.getElementById('tab-mens').className   = 'tab-btn' + (which === 'mens'   ? ' active-mens'   : '');
+    document.getElementById('tab-womens').className = 'tab-btn' + (which === 'womens' ? ' active-womens' : '');
+  }
 
   // ── Clock ──────────────────────────────────────────────────────────────
   function updateClock() {
@@ -282,7 +288,6 @@
     });
     document.getElementById('clock').textContent = `${date}  ·  ${et} ET`;
 
-    // Week label (Mon – Sun)
     const days = weekDatesET();
     const fmt = d => new Date(d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6)+'T12:00:00')
       .toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -292,7 +297,7 @@
 
   // ── Date helpers ───────────────────────────────────────────────────────
   function todayET() {
-    return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // YYYY-MM-DD
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
   }
   function dateET(iso) {
     if (!iso) return '';
@@ -305,20 +310,18 @@
     }) + ' ET';
   }
 
-  // Returns YYYYMMDD strings for Mon–Sun of the week containing today (ET)
+  // Mon–Sun of current week as YYYYMMDD strings
   function weekDatesET() {
     const todayStr = todayET();
     const base = new Date(todayStr + 'T12:00:00');
-    const dow = base.getDay(); // 0=Sun … 6=Sat
+    const dow = base.getDay();
     const monday = new Date(base);
     monday.setDate(base.getDate() - (dow === 0 ? 6 : dow - 1));
-    const dates = [];
-    for (let i = 0; i < 7; i++) {
+    return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
-      dates.push(d.toLocaleDateString('en-CA').replace(/-/g, ''));
-    }
-    return dates;
+      return d.toLocaleDateString('en-CA').replace(/-/g, '');
+    });
   }
 
   // ── Status label ───────────────────────────────────────────────────────
@@ -332,23 +335,19 @@
 
   // ── Team logo ──────────────────────────────────────────────────────────
   function teamLogoHtml(c) {
-    const src = c?.team?.logo || c?.athlete?.headshot?.href;
-    const abbr = c?.team?.abbreviation || c?.athlete?.shortName || '?';
-    if (src) {
-      return `<img class="team-logo" src="${src}" alt="${abbr}" onerror="this.style.display='none'">`;
-    }
+    const src  = c?.team?.logo;
+    const abbr = c?.team?.abbreviation || '?';
+    if (src) return `<img class="team-logo" src="${src}" alt="${abbr}" onerror="this.style.display='none'">`;
     return `<div class="team-logo-placeholder">${abbr.slice(0,3)}</div>`;
   }
 
-  // ── Build a single game card ───────────────────────────────────────────
-  function buildCard(event, todayOnly) {
+  // ── Game card ──────────────────────────────────────────────────────────
+  function buildCard(event) {
     const comps = event?.competitions?.[0];
     if (!comps) return '';
-
     const competitors = comps?.competitors || [];
     const home = competitors.find(c => c.homeAway === 'home') || competitors[0];
     const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
-
     const { label, cls } = statusLabel(event);
     const isPost = event?.status?.type?.state === 'post';
     const isLive = event?.status?.type?.state === 'in';
@@ -359,63 +358,50 @@
       const hasScore = isPost || isLive;
       const score    = hasScore ? (c.score ?? '—') : '';
       const win      = isPost && c.winner;
-      // Beach volleyball: prefer athlete display name
-      const name = c.team?.displayName || c.athlete?.displayName || 'TBD';
       return `
         <div class="team-row">
           <span class="team-rank">${rank}</span>
           ${teamLogoHtml(c)}
-          <span class="team-name ${win ? 'winner' : ''}">${name}</span>
+          <span class="team-name ${win ? 'winner' : ''}">${c.team?.displayName || 'TBD'}</span>
           <span class="score ${win ? 'winner' : ''} ${!hasScore ? 'no-score' : ''}">${score}</span>
         </div>`;
     }
 
-    // Venue / note
     const venue = comps?.venue?.fullName
-      ? `${comps.venue.fullName}${comps.venue.address?.city ? ', ' + comps.venue.address.city : ''}`
-      : '';
+      ? `${comps.venue.fullName}${comps.venue.address?.city ? ', ' + comps.venue.address.city : ''}` : '';
     const note = comps?.notes?.[0]?.headline ? ` · ${comps.notes[0].headline}` : '';
 
-    // Broadcast badges
     const broadcastSet = new Set();
     (comps?.broadcasts || []).forEach(b => (b.names || []).forEach(n => broadcastSet.add(n)));
     (comps?.geoBroadcasts || []).forEach(b => {
       const n = b.media?.shortName || b.media?.name;
       if (n) broadcastSet.add(n);
     });
-    const STREAM_KW = ['espn+', 'peacock', 'paramount+', 'max', 'hulu', 'fubo',
-                       'sling', 'youtube', 'amazon', 'apple', 'pluto', 'tubi', '+'];
+    const STREAM_KW = ['espn+','peacock','paramount+','max','hulu','fubo','sling','youtube','amazon','apple','pluto','tubi','+'];
     const badges = [...broadcastSet].map(name => {
       const bCls = STREAM_KW.some(k => name.toLowerCase().includes(k)) ? 'stream' : 'tv';
       return `<span class="broadcast-badge ${bCls}">${name}</span>`;
     }).join('');
-    const broadcastHtml = badges ? `<div class="broadcast-row">${badges}</div>` : '';
 
     return `
       <div class="game-card">
         <div class="game-status ${cls}">${label}</div>
-        <div class="matchup">
-          ${teamRow(away)}
-          ${teamRow(home)}
-        </div>
-        ${broadcastHtml}
+        <div class="matchup">${teamRow(away)}${teamRow(home)}</div>
+        ${badges ? `<div class="broadcast-row">${badges}</div>` : ''}
         <div class="game-detail">${venue}${note}</div>
       </div>`;
   }
 
-  // ── Fetch one day from ESPN ────────────────────────────────────────────
+  // ── Fetch one day ──────────────────────────────────────────────────────
   async function fetchDay(slug, yyyymmdd) {
-    const url = `${BASE}/${slug}/scoreboard?limit=300&dates=${yyyymmdd}`;
-    const res = await fetch(url);
+    const res = await fetch(`${BASE}/${slug}/scoreboard?limit=300&dates=${yyyymmdd}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    return data?.events || [];
+    return (await res.json())?.events || [];
   }
 
-  // ── Fetch the full current week (Mon–Sun) for a feed ──────────────────
-  async function fetchFeed({ slug }) {
-    const days = weekDatesET();
-    const results = await Promise.all(days.map(d => fetchDay(slug, d)));
+  // ── Fetch full current week ────────────────────────────────────────────
+  async function fetchWeek(slug) {
+    const results = await Promise.all(weekDatesET().map(d => fetchDay(slug, d)));
     const seen = new Set();
     const events = [];
     for (const batch of results) {
@@ -427,8 +413,8 @@
     return events;
   }
 
-  // ── Render one section grouped by date ────────────────────────────────
-  function renderSection(id, events) {
+  // ── Render: date-grouped list (Men's) ─────────────────────────────────
+  function renderGrouped(id, events) {
     const el = document.getElementById(id);
     if (!el) return;
     if (!events.length) {
@@ -436,41 +422,72 @@
       return;
     }
     const today = todayET();
-    let html = '';
-    let lastDate = '';
+    let html = '', lastDate = '';
     for (const e of events) {
       const d = dateET(e.date);
       if (d !== lastDate) {
         lastDate = d;
-        const isToday = d === today;
         const label = new Date(d + 'T12:00:00').toLocaleDateString('en-US', {
           weekday: 'long', month: 'short', day: 'numeric'
         });
-        html += `<div class="date-divider ${isToday ? 'today' : ''}">${label}</div>`;
+        html += `<div class="date-divider ${d === today ? 'today' : ''}">${label}</div>`;
       }
       html += buildCard(e);
     }
     el.innerHTML = html;
   }
 
-  function renderError(id, err) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.innerHTML = `<div class="error-msg">Data unavailable (${err.message}).</div>`;
+  // ── Render: Women's split (upcoming vs completed) ─────────────────────
+  function renderWomensSplit(events) {
+    const today = todayET();
+    const upcoming  = events.filter(e => e?.status?.type?.state !== 'post');
+    const completed = events.filter(e => e?.status?.type?.state === 'post').reverse(); // newest first
+
+    function buildGrouped(list, emptyMsg) {
+      if (!list.length) return `<div class="no-games">${emptyMsg}</div>`;
+      let html = '', lastDate = '';
+      for (const e of list) {
+        const d = dateET(e.date);
+        if (d !== lastDate) {
+          lastDate = d;
+          const label = new Date(d + 'T12:00:00').toLocaleDateString('en-US', {
+            weekday: 'long', month: 'short', day: 'numeric'
+          });
+          html += `<div class="date-divider ${d === today ? 'today' : ''}">${label}</div>`;
+        }
+        html += buildCard(e);
+      }
+      return html;
+    }
+
+    document.getElementById('womens-upcoming').innerHTML =
+      buildGrouped(upcoming, 'No upcoming games this week.');
+    document.getElementById('womens-completed').innerHTML =
+      buildGrouped(completed, 'No completed games this week.');
   }
 
-  // ── Load all feeds independently ───────────────────────────────────────
+  // ── Load everything ────────────────────────────────────────────────────
   async function loadAll() {
-    await Promise.all(
-      FEEDS.map(async feed => {
-        try {
-          const events = await fetchFeed(feed);
-          renderSection(feed.id, events);
-        } catch (err) {
-          renderError(feed.id, err);
-        }
-      })
-    );
+    const [mensEvents, womensEvents] = await Promise.allSettled([
+      fetchWeek('mens-college-volleyball'),
+      fetchWeek('womens-college-volleyball'),
+    ]);
+
+    if (mensEvents.status === 'fulfilled') {
+      renderGrouped('mens-games', mensEvents.value);
+    } else {
+      document.getElementById('mens-games').innerHTML =
+        `<div class="error-msg">Could not load data (${mensEvents.reason?.message}).</div>`;
+    }
+
+    if (womensEvents.status === 'fulfilled') {
+      renderWomensSplit(womensEvents.value);
+    } else {
+      ['womens-upcoming','womens-completed'].forEach(id => {
+        document.getElementById(id).innerHTML =
+          `<div class="error-msg">Could not load data (${womensEvents.reason?.message}).</div>`;
+      });
+    }
 
     const now = new Date().toLocaleTimeString('en-US', {
       timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit', hour12: true
