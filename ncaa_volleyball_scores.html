@@ -405,7 +405,7 @@
 
   // ── Fetch one day from ESPN ────────────────────────────────────────────
   async function fetchDay(slug, yyyymmdd) {
-    const url = `${BASE}/${slug}/scoreboard?limit=100&dates=${yyyymmdd}`;
+    const url = `${BASE}/${slug}/scoreboard?limit=300&dates=${yyyymmdd}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
