@@ -94,7 +94,8 @@
       flex-shrink: 0;
       border-bottom: 1px solid #1e1e3a;
     }
-    .col-header.upcoming { color: #f0c040; background: #0e0e1c; }
+    .col-header.upcoming  { color: #f0c040; background: #0e0e1c; }
+    .col-header.live      { color: #ff4d4d; background: #140e0e; }
     .col-header.completed { color: #888;    background: #0c0c18; }
 
     .col-scroll {
@@ -253,9 +254,15 @@
 <!-- ── Women's panel ── -->
 <div class="tab-panel" id="panel-womens">
   <div class="womens-col">
-    <div class="col-header upcoming">&#9654; Live &amp; Upcoming</div>
+    <div class="col-header upcoming">&#9654; Upcoming</div>
     <div class="col-scroll">
       <div class="game-list" id="womens-upcoming"><div class="spinner">Loading…</div></div>
+    </div>
+  </div>
+  <div class="womens-col">
+    <div class="col-header live">&#9679; Live</div>
+    <div class="col-scroll">
+      <div class="game-list" id="womens-live"><div class="spinner">Loading…</div></div>
     </div>
   </div>
   <div class="womens-col">
@@ -439,8 +446,9 @@
 
   // ── Render: Women's split (upcoming vs completed) ─────────────────────
   function renderWomensSplit(events) {
-    const today = todayET();
-    const upcoming  = events.filter(e => e?.status?.type?.state !== 'post');
+    const today    = todayET();
+    const upcoming  = events.filter(e => e?.status?.type?.state === 'pre');
+    const live      = events.filter(e => e?.status?.type?.state === 'in');
     const completed = events.filter(e => e?.status?.type?.state === 'post').reverse(); // newest first
 
     function buildGrouped(list, emptyMsg) {
@@ -461,7 +469,9 @@
     }
 
     document.getElementById('womens-upcoming').innerHTML =
-      buildGrouped(upcoming, 'No upcoming games this week.');
+      buildGrouped(upcoming,  'No upcoming games this week.');
+    document.getElementById('womens-live').innerHTML =
+      buildGrouped(live,      'No games in progress.');
     document.getElementById('womens-completed').innerHTML =
       buildGrouped(completed, 'No completed games this week.');
   }
@@ -483,7 +493,7 @@
     if (womensEvents.status === 'fulfilled') {
       renderWomensSplit(womensEvents.value);
     } else {
-      ['womens-upcoming','womens-completed'].forEach(id => {
+      ['womens-upcoming','womens-live','womens-completed'].forEach(id => {
         document.getElementById(id).innerHTML =
           `<div class="error-msg">Could not load data (${womensEvents.reason?.message}).</div>`;
       });
