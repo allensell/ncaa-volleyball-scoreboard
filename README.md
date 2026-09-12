@@ -31,8 +31,8 @@ Serve it with a local HTTPS-ready server to get proper security headers:
 npm start
 ```
 
-This runs `npx serve` on port 8080 with the headers defined in `serve.json`.  
-Open **http://localhost:8080** in your browser.
+This runs `npx serve` on port 8090 with the headers defined in `serve.json`.  
+Open **http://localhost:8090** in your browser.
 
 No `npm install` needed — `npx` fetches `serve` automatically on first run.
 

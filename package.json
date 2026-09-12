@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "NCAA D1 volleyball scoreboard — live scores, broadcast info, and weekly schedule",
   "scripts": {
-    "start": "npx serve . --listen 8080 --config serve.json",
-    "start:port": "npx serve . --listen ${PORT:-8080} --config serve.json"
+    "start": "npx serve . --listen 8090 --config serve.json",
+    "start:port": "npx serve . --listen ${PORT:-8090} --config serve.json"
   },
   "license": "MIT"
 }
