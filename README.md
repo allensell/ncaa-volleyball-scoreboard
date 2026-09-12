@@ -17,6 +17,34 @@ A single-page web application that displays NCAA Division I Men's and Women's in
 
 Scores and schedules are pulled from ESPN's public scoreboard API. Only the two NCAA Division I indoor volleyball leagues (men's and women's) are available through this API.
 
-## Usage
+## Hosted (HTTPS)
 
-Open `ncaa_volleyball_scores.html` directly in any web browser — no server or build step required. An internet connection is needed to fetch live data.
+The scoreboard is publicly available over HTTPS via GitHub Pages:
+
+**https://allensell.github.io/ncaa-volleyball-scoreboard/**
+
+## Running locally
+
+Serve it with a local HTTPS-ready server to get proper security headers:
+
+```bash
+npm start
+```
+
+This runs `npx serve` on port 8080 with the headers defined in `serve.json`.  
+Open **http://localhost:8080** in your browser.
+
+No `npm install` needed — `npx` fetches `serve` automatically on first run.
+
+## Security headers (serve.json)
+
+When served through `npm start`, the following headers are applied:
+
+| Header | Value |
+|---|---|
+| `Content-Security-Policy` | Restricts connections to ESPN API only; blocks inline frames |
+| `X-Frame-Options` | `DENY` — prevents clickjacking |
+| `X-Content-Type-Options` | `nosniff` |
+| `X-XSS-Protection` | `1; mode=block` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Permissions-Policy` | Disables geolocation, microphone, camera |
