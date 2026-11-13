@@ -143,6 +143,12 @@
       transition: background 0.2s;
     }
     .game-card:hover { background: #1c1c38; }
+    .game-card.ranked {
+      border-color: #c09020;
+      background: #1a1600;
+      box-shadow: 0 0 6px rgba(192, 144, 32, 0.25);
+    }
+    .game-card.ranked:hover { background: #221c00; }
 
     .game-status {
       font-size: 0.65rem;
@@ -364,8 +370,9 @@
     const home = competitors.find(c => c.homeAway === 'home') || competitors[0];
     const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
     const { label, cls } = statusLabel(event);
-    const isPost = event?.status?.type?.state === 'post';
-    const isLive = event?.status?.type?.state === 'in';
+    const isPost   = event?.status?.type?.state === 'post';
+    const isLive   = event?.status?.type?.state === 'in';
+    const isRanked = [home, away].some(c => c?.curatedRank?.current >= 1 && c?.curatedRank?.current <= 25);
 
     function teamRow(c) {
       if (!c) return '';
@@ -399,7 +406,7 @@
     }).join('');
 
     return `
-      <div class="game-card">
+      <div class="game-card${isRanked ? ' ranked' : ''}">
         <div class="game-status ${cls}">${label}</div>
         <div class="matchup">${teamRow(away)}${teamRow(home)}</div>
         ${badges ? `<div class="broadcast-row">${badges}</div>` : ''}
